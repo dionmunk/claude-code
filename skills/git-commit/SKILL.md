@@ -66,22 +66,27 @@ B) Recommended Commit(s)
 - If multiple commits are cleaner, show them in order.
 
 C) Copy-Ready Commit Message(s)
-Provide the final commit message(s) in Markdown code block(s),
-formatted exactly as they should be used.
 
-Rules for Code Blocks:
-- Use triple backticks
-- One commit per code block
-- No commentary inside the code block
+Rules:
+- Use triple backtick code blocks
+- One commit message per code block
+- No commentary inside code blocks
 - Ready to paste into `git commit -m` or an editor
 - If a description body is included, format each item as a bullet point using `-`
-- When multiple commits are recommended, precede each commit message block
-  with a copyable `git add` command listing the specific files for that commit.
-  Use `git reset HEAD` before the first group if files are already staged incorrectly.
-  Example:
-  ```
-  git add src/auth/oauth.ts src/auth/providers.ts src/models/user.ts
-  ```
+
+Single commit format:
+- Show just the commit message in a code block.
+
+Multiple commit format:
+- Number each commit with a "Commit N:" header
+- Under each header, show the `git add` command as an inline code span (single backticks)
+- Then show the commit message in a triple-backtick code block
+- Group files by directory when possible (e.g. `git add backend/` instead of listing every file)
+- Use `git reset HEAD` before the first group if files are already staged incorrectly.
+- Example:
+
+  Commit 1:
+  `git add src/auth/ src/models/user.ts`
   ```
   feat(auth): add OAuth2 login flow
 
@@ -89,9 +94,8 @@ Rules for Code Blocks:
   - Implement token refresh logic
   - Update user model with provider fields
   ```
-  ```
-  git add src/auth/__tests__/oauth.test.ts
-  ```
+  Commit 2:
+  `git add src/auth/__tests__/`
   ```
   test(auth): add OAuth2 login tests
   ```
