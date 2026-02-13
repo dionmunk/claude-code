@@ -75,13 +75,25 @@ Rules for Code Blocks:
 - No commentary inside the code block
 - Ready to paste into `git commit -m` or an editor
 - If a description body is included, format each item as a bullet point using `-`
+- When multiple commits are recommended, precede each commit message block
+  with a copyable `git add` command listing the specific files for that commit.
+  Use `git reset HEAD` before the first group if files are already staged incorrectly.
   Example:
+  ```
+  git add src/auth/oauth.ts src/auth/providers.ts src/models/user.ts
+  ```
   ```
   feat(auth): add OAuth2 login flow
 
   - Add Google and GitHub provider support
   - Implement token refresh logic
   - Update user model with provider fields
+  ```
+  ```
+  git add src/auth/__tests__/oauth.test.ts
+  ```
+  ```
+  test(auth): add OAuth2 login tests
   ```
 
 Quality Bar:
