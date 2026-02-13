@@ -34,7 +34,7 @@ fi
 mkdir -p "$tmp/out" "$DEST"
 
 # Extract only the requested directory
-unzip -q "$zip" "${want}*" -d "$tmp/out"
+unzip -qo "$zip" "${want}*" -d "$tmp/out"
 
 # Copy extracted dir contents into DEST (preserve structure under SUBDIR)
 # If you want the SUBDIR folder itself copied into DEST, change the rsync source to "$tmp/out/$want"
