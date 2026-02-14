@@ -68,25 +68,39 @@ B) Recommended Commit(s)
 C) Copy-Ready Commit Message(s)
 
 Rules:
-- Use triple backtick code blocks
+- Use triple backtick code blocks for both `git add` commands and commit messages
 - One commit message per code block
 - No commentary inside code blocks
-- Ready to paste into `git commit -m` or an editor
+- Ready to paste into the terminal
 - If a description body is included, format each item as a bullet point using `-`
+- Group files by directory when possible (e.g. `git add backend/` instead of listing every file)
 
 Single commit format:
-- Show just the commit message in a code block.
+- Show the `git add` command in a code block, then the commit message in a separate code block.
+- If all changes are already staged, omit the `git add` block.
+- Example:
+
+  ```
+  git add src/auth/ src/models/user.ts
+  ```
+  ```
+  feat(auth): add OAuth2 login flow
+
+  - Add Google and GitHub provider support
+  - Implement token refresh logic
+  - Update user model with provider fields
+  ```
 
 Multiple commit format:
 - Number each commit with a "Commit N:" header
-- Under each header, show the `git add` command as an inline code span (single backticks)
-- Then show the commit message in a triple-backtick code block
-- Group files by directory when possible (e.g. `git add backend/` instead of listing every file)
+- Under each header, show the `git add` command in a code block, then the commit message in a separate code block
 - Use `git reset HEAD` before the first group if files are already staged incorrectly.
 - Example:
 
   Commit 1:
-  `git add src/auth/ src/models/user.ts`
+  ```
+  git add src/auth/ src/models/user.ts
+  ```
   ```
   feat(auth): add OAuth2 login flow
 
@@ -95,7 +109,9 @@ Multiple commit format:
   - Update user model with provider fields
   ```
   Commit 2:
-  `git add src/auth/__tests__/`
+  ```
+  git add src/auth/__tests__/
+  ```
   ```
   test(auth): add OAuth2 login tests
   ```
