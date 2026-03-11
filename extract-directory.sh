@@ -38,7 +38,75 @@ mkdir -p "$tmp/out" "$DEST"
 # Extract only the requested directory
 unzip -qo "$zip" "${want}*" -d "$tmp/out"
 
-# Copy extracted dir contents into DEST (preserve structure under SUBDIR)
-# If you want the SUBDIR folder itself copied into DEST, change the rsync source to "$tmp/out/$want"
-rsync -a --delete "$tmp/out/$want" "$DEST"/
-echo "Done: ${REPO}@${REF}:${SUBDIR} -> ${DEST}"
+src="$tmp/out/$want"
+
+# Snapshot existing items before sync
+before="$tmp/before.txt"
+after="$tmp/after.txt"
+if [ -d "$DEST" ]; then
+  (cd "$DEST" && find . -mindepth 1 -maxdepth 1 -type d | sed 's|^\./||' | sort) > "$before"
+else
+  touch "$before"
+fi
+
+# Snapshot incoming items
+(cd "$src" && find . -mindepth 1 -maxdepth 1 -type d | sed 's|^\./||' | sort) > "$after"
+
+# Compute added, removed, and common items
+added=$(comm -13 "$before" "$after")
+removed=$(comm -23 "$before" "$after")
+common=$(comm -12 "$before" "$after")
+
+# Determine which common items have changed (must diff BEFORE rsync)
+updated=""
+unchanged=""
+if [ -n "$common" ]; then
+  while IFS= read -r item; do
+    if ! diff -rq "$src/$item" "$DEST/$item" > /dev/null 2>&1; then
+      updated="${updated:+$updated$'\n'}$item"
+    else
+      unchanged="${unchanged:+$unchanged$'\n'}$item"
+    fi
+  done <<< "$common"
+fi
+
+# Sync contents into DEST
+rsync -a --delete "$src" "$DEST"/
+
+# Report summary
+echo ""
+echo "Synced ${REPO}@${REF}:${SUBDIR} -> ${DEST}"
+echo ""
+
+if [ -n "$added" ]; then
+  while IFS= read -r item; do
+    echo "  + added:     $item"
+  done <<< "$added"
+fi
+
+if [ -n "$updated" ]; then
+  while IFS= read -r item; do
+    echo "  ~ updated:   $item"
+  done <<< "$updated"
+fi
+
+if [ -n "$removed" ]; then
+  while IFS= read -r item; do
+    echo "  - removed:   $item"
+  done <<< "$removed"
+fi
+
+if [ -n "$unchanged" ]; then
+  while IFS= read -r item; do
+    echo "    unchanged: $item"
+  done <<< "$unchanged"
+fi
+
+# Count totals
+count_added=$([ -n "$added" ] && echo "$added" | wc -l | tr -d ' ' || echo 0)
+count_updated=$([ -n "$updated" ] && echo "$updated" | wc -l | tr -d ' ' || echo 0)
+count_removed=$([ -n "$removed" ] && echo "$removed" | wc -l | tr -d ' ' || echo 0)
+count_total=$(wc -l < "$after" | tr -d ' ')
+
+echo ""
+echo "Total: $count_total items ($count_added added, $count_updated updated, $count_removed removed)"
