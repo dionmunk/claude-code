@@ -21,11 +21,13 @@ zip="$tmp/repo.zip"
 curl -fsSL "$ZIP_URL" -o "$zip"
 
 # Find the top-level folder name inside the zip (e.g., REPO-<sha>/)
-top="$(zipinfo -1 "$zip" | head -n 1 | cut -d/ -f1)"
+# Use a variable to avoid SIGPIPE from pipefail when head closes early
+listing="$(zipinfo -1 "$zip")"
+top="$(echo "$listing" | head -n 1 | cut -d/ -f1)"
 want="${top}/${SUBDIR%/}/"
 
 # Validate the requested directory exists in the zip
-if ! zipinfo -1 "$zip" | grep -q "^${want}"; then
+if ! echo "$listing" | grep -q "^${want}"; then
   echo "ERROR: '${SUBDIR}' not found in ${REPO}@${REF}"
   echo "Tip: verify the path; it must be relative to repo root."
   exit 2
